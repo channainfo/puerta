@@ -2,12 +2,6 @@ module Puerta
   module Nl
     class Checkout
 
-      # host = https://www.nganluong.vn
-      # end_point ='/checkout.api.nganluong.post.php';
-      # merchant_id = '';
-      # merchant_password = '';
-      # receiver_email = '';
-      # cur_code = 'vnd';
       VERSION = '3.1'
       TYPES = [ 'ATM_ONLINE', 'IB_ONLINE', 'VISA', 'ATM_OFFLINE', 'NH_OFFLINE', 'NL', 'CREDIT_CARD_PREPAID', ]
 
@@ -40,13 +34,52 @@ module Puerta
         MASTER: {title: "Master", type: ['VISA'] },
       }
 
+      MODE = {
+        production: {
+          host: 'https://www.nganluong.vn',
+          endpoint: '/checkout.api.nganluong.post.php',
+        },
+        sandbox: {
+          host: 'https://sandbox.nganluong.vn:8088',
+          endpoint: '/nl35/checkout.api.nganluong.post.php',
+        }
+      }
+
       attr_accessor :type
 
+      # merchant_id = '';
+      # merchant_password = '';
+      # receiver_email = '';
+      # cur_code = 'vnd';
       def initialize(type, options={})
         raise "Invalid type: #{type} in #{Checkout::TYPES}" if !Checkout::TYPES.include?(type)
 
         @type    = type
         @options = options
+      end
+
+      def host
+        if Puerta.config.sandbox?
+          Checkout::MODE[:sandbox][:host]
+        elsif Puerta.config.production?
+          Checkout::MODE[:production][:host]
+        end
+      end
+
+      def endpoint
+        if Puerta.config.sandbox?
+          Checkout::MODE[:sandbox][:endpoint]
+        elsif Puerta.config.production?
+          Checkout::MODE[:production][:endpoint]
+        end
+      end
+
+      def self.payment_types
+        result = {}
+        TYPES.each do |payment_type|
+          result[payment_type] = Checkout::BANK_CODES.reject {|k,v|  !v[:type].include?(payment_type)}
+        end
+        result
       end
 
       def payment_methods
@@ -62,17 +95,15 @@ module Puerta
           token:token
         }
 
-        connection = Faraday::Connection.new @options[:host], ssl: { verify: false }
+        connection = Faraday::Connection.new host, ssl: { verify: false }
 
         response = connection.post do |req|
-          req.url @options[:end_point]
+          req.url endpoint
           req.body = params
         end
 
         response
       end
-
-      def
 
       def require_params
         [ 'merchant_id', 'merchant_password', 'version', 'function', 'receiver_email', 'order_code', 'total_amount', 'payment_method' ]
@@ -114,10 +145,10 @@ module Puerta
       def call(card_options)
         params = payment_options(card_options)
 
-        connection = Faraday::Connection.new @options[:host], ssl: { verify: false }
+        connection = Faraday::Connection.new host, ssl: { verify: false }
 
         response = connection.post do |req|
-          req.url @options[:end_point]
+          req.url endpoint
           req.body = params
         end
 

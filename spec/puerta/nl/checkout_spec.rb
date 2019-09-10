@@ -1,6 +1,126 @@
 require 'spec_helper'
 
 RSpec.describe Puerta::Nl::Checkout do
+
+  describe ".payment_types" do
+    it "return a hash of payment_type along with its payment methods" do
+      result = Puerta::Nl::Checkout.payment_types
+      expected = {
+        "ATM_ONLINE"=>{
+          :BIDV=>{:title=>"Ngân hàng TMCP Đầu tư & Phát triển Việt Nam", :type=>["ATM_ONLINE", "IB_ONLINE", "ATM_OFFLINE", "NH_OFFLINE"]},
+          :VCB=>{:title=>"Ngân hàng TMCP Ngoại Thương Việt Nam", :type=>["ATM_ONLINE", "IB_ONLINE", "ATM_OFFLINE", "NH_OFFLINE"]},
+          :DAB=>{:title=>"Ngân hàng Đông Á", :type=>["ATM_ONLINE", "IB_ONLINE", "ATM_OFFLINE", "NH_OFFLINE"]},
+          :TCB=>{:title=>"Ngân hàng Kỹ Thương", :type=>["ATM_ONLINE", "IB_ONLINE", "ATM_OFFLINE", "NH_OFFLINE"]},
+          :MB=>{:title=>"Ngân hàng Quân Đội", :type=>["ATM_ONLINE", "ATM_OFFLINE", "NH_OFFLINE"]},
+          :VIB=>{:title=>"Ngân hàng Quốc tế", :type=>["ATM_ONLINE", "NH_OFFLINE"]},
+          :ICB=>{:title=>"Ngân hàng Công Thương Việt Nam", :type=>["ATM_ONLINE", "ATM_OFFLINE", "NH_OFFLINE"]},
+          :EXB=>{:title=>"Ngân hàng Xuất Nhập Khẩu", :type=>["ATM_ONLINE"]},
+          :ACB=>{:title=>"Ngân hàng Á Châu", :type=>["ATM_ONLINE", "ATM_OFFLINE", "NH_OFFLINE"]},
+          :HDB=>{:title=>"Ngân hàng Phát triển Nhà TPHCM", :type=>["ATM_ONLINE"]},
+          :MSB=>{:title=>"Ngân hàng Hàng Hải", :type=>["ATM_ONLINE", "ATM_OFFLINE", "NH_OFFLINE"]},
+          :NVB=>{:title=>"Ngân hàng Nam Việt", :type=>["ATM_ONLINE"]},
+          :VAB=>{:title=>"Ngân hàng Việt Á", :type=>["ATM_ONLINE"]},
+          :VPB=>{:title=>"Ngân Hàng Việt Nam Thịnh Vượng", :type=>["ATM_ONLINE"]},
+          :SCB=>{:title=>"Ngân hàng Sài Gòn Thương tín", :type=>["ATM_ONLINE", "ATM_OFFLINE", "NH_OFFLINE"]},
+          :PGB=>{:title=>"Ngân hàng Xăng dầu Petrolimex", :type=>["ATM_ONLINE", "ATM_OFFLINE", "NH_OFFLINE"]},
+          :GPB=>{:title=>"Ngân hàng TMCP Dầu khí Toàn Cầu", :type=>["ATM_ONLINE"]},
+          :AGB=>{:title=>"Ngân hàng Nông nghiệp & Phát triển nông thôn", :type=>["ATM_ONLINE", "ATM_OFFLINE", "NH_OFFLINE"]},
+          :SGB=>{:title=>"Ngân hàng Sài Gòn Công Thương", :type=>["ATM_ONLINE"]},
+          :BAB=>{:title=>"Ngân hàng Bắc Á", :type=>["ATM_ONLINE"]},
+          :TPB=>{:title=>"Tền phong bank", :type=>["ATM_ONLINE", "NH_OFFLINE"]},
+          :NAB=>{:title=>"Ngân hàng Nam Á", :type=>["ATM_ONLINE"]},
+          :SHB=>{:title=>"Ngân hàng TMCP Sài Gòn - Hà Nội (SHB)", :type=>["ATM_ONLINE", "ATM_OFFLINE"]},
+          :OJB=>{:title=>"Ngân hàng TMCP Đại Dương (OceanBank)", :type=>["ATM_ONLINE"]}},
+        "IB_ONLINE"=>{
+          :BIDV=>{:title=>"Ngân hàng TMCP Đầu tư & Phát triển Việt Nam", :type=>["ATM_ONLINE", "IB_ONLINE", "ATM_OFFLINE", "NH_OFFLINE"]},
+          :VCB=>{:title=>"Ngân hàng TMCP Ngoại Thương Việt Nam", :type=>["ATM_ONLINE", "IB_ONLINE", "ATM_OFFLINE", "NH_OFFLINE"]},
+          :DAB=>{:title=>"Ngân hàng Đông Á", :type=>["ATM_ONLINE", "IB_ONLINE", "ATM_OFFLINE", "NH_OFFLINE"]},
+          :TCB=>{:title=>"Ngân hàng Kỹ Thương", :type=>["ATM_ONLINE", "IB_ONLINE", "ATM_OFFLINE", "NH_OFFLINE"]}},
+       "VISA"=>{
+         :VISA=>{:title=>"Visa", :type=>["VISA"]},
+         :MASTER=>{:title=>"Master", :type=>["VISA"]}},
+      "ATM_OFFLINE"=>{
+        :BIDV=>{:title=>"Ngân hàng TMCP Đầu tư & Phát triển Việt Nam", :type=>["ATM_ONLINE", "IB_ONLINE", "ATM_OFFLINE", "NH_OFFLINE"]},
+        :VCB=>{:title=>"Ngân hàng TMCP Ngoại Thương Việt Nam", :type=>["ATM_ONLINE", "IB_ONLINE", "ATM_OFFLINE", "NH_OFFLINE"]},
+        :DAB=>{:title=>"Ngân hàng Đông Á", :type=>["ATM_ONLINE", "IB_ONLINE", "ATM_OFFLINE", "NH_OFFLINE"]},
+        :TCB=>{:title=>"Ngân hàng Kỹ Thương", :type=>["ATM_ONLINE", "IB_ONLINE", "ATM_OFFLINE", "NH_OFFLINE"]},
+        :MB=>{:title=>"Ngân hàng Quân Đội", :type=>["ATM_ONLINE", "ATM_OFFLINE", "NH_OFFLINE"]},
+        :ICB=>{:title=>"Ngân hàng Công Thương Việt Nam", :type=>["ATM_ONLINE", "ATM_OFFLINE", "NH_OFFLINE"]},
+        :ACB=>{:title=>"Ngân hàng Á Châu", :type=>["ATM_ONLINE", "ATM_OFFLINE", "NH_OFFLINE"]},
+        :MSB=>{:title=>"Ngân hàng Hàng Hải", :type=>["ATM_ONLINE", "ATM_OFFLINE", "NH_OFFLINE"]},
+        :SCB=>{:title=>"Ngân hàng Sài Gòn Thương tín", :type=>["ATM_ONLINE", "ATM_OFFLINE", "NH_OFFLINE"]},
+        :PGB=>{:title=>"Ngân hàng Xăng dầu Petrolimex", :type=>["ATM_ONLINE", "ATM_OFFLINE", "NH_OFFLINE"]},
+        :AGB=>{:title=>"Ngân hàng Nông nghiệp & Phát triển nông thôn", :type=>["ATM_ONLINE", "ATM_OFFLINE", "NH_OFFLINE"]},
+        :SHB=>{:title=>"Ngân hàng TMCP Sài Gòn - Hà Nội (SHB)", :type=>["ATM_ONLINE", "ATM_OFFLINE"]}},
+      "NH_OFFLINE"=>{
+        :BIDV=>{:title=>"Ngân hàng TMCP Đầu tư & Phát triển Việt Nam", :type=>["ATM_ONLINE", "IB_ONLINE", "ATM_OFFLINE", "NH_OFFLINE"]},
+        :VCB=>{:title=>"Ngân hàng TMCP Ngoại Thương Việt Nam", :type=>["ATM_ONLINE", "IB_ONLINE", "ATM_OFFLINE", "NH_OFFLINE"]},
+        :DAB=>{:title=>"Ngân hàng Đông Á", :type=>["ATM_ONLINE", "IB_ONLINE", "ATM_OFFLINE", "NH_OFFLINE"]},
+        :TCB=>{:title=>"Ngân hàng Kỹ Thương", :type=>["ATM_ONLINE", "IB_ONLINE", "ATM_OFFLINE", "NH_OFFLINE"]},
+        :MB=>{:title=>"Ngân hàng Quân Đội", :type=>["ATM_ONLINE", "ATM_OFFLINE", "NH_OFFLINE"]},
+        :VIB=>{:title=>"Ngân hàng Quốc tế", :type=>["ATM_ONLINE", "NH_OFFLINE"]},
+        :ICB=>{:title=>"Ngân hàng Công Thương Việt Nam", :type=>["ATM_ONLINE", "ATM_OFFLINE", "NH_OFFLINE"]},
+        :ACB=>{:title=>"Ngân hàng Á Châu", :type=>["ATM_ONLINE", "ATM_OFFLINE", "NH_OFFLINE"]},
+        :MSB=>{:title=>"Ngân hàng Hàng Hải", :type=>["ATM_ONLINE", "ATM_OFFLINE", "NH_OFFLINE"]},
+        :SCB=>{:title=>"Ngân hàng Sài Gòn Thương tín", :type=>["ATM_ONLINE", "ATM_OFFLINE", "NH_OFFLINE"]},
+        :PGB=>{:title=>"Ngân hàng Xăng dầu Petrolimex", :type=>["ATM_ONLINE", "ATM_OFFLINE", "NH_OFFLINE"]},
+        :AGB=>{:title=>"Ngân hàng Nông nghiệp & Phát triển nông thôn", :type=>["ATM_ONLINE", "ATM_OFFLINE", "NH_OFFLINE"]},
+        :TPB=>{:title=>"Tền phong bank", :type=>["ATM_ONLINE", "NH_OFFLINE"]}},
+      "NL"=>{},
+      "CREDIT_CARD_PREPAID"=>{} }
+
+      expect(result).to eq expected
+    end
+
+  end
+
+  describe "#host" do
+    context 'with sanbox env' do
+      it 'return https://sandbox.nganluong.vn:8088' do
+        Puerta.reset_config
+        checkout = Puerta::Nl::Checkout.new('ATM_ONLINE', {})
+        expect(checkout.host).to eq 'https://sandbox.nganluong.vn:8088'
+      end
+    end
+
+    context 'with production env' do
+      it 'return https://sandbox.nganluong.vn:8088' do
+        Puerta.reset_config
+        Puerta.configure do |config|
+          config.env = :production
+        end
+
+        checkout = Puerta::Nl::Checkout.new('ATM_ONLINE', {})
+        expect(checkout.host).to eq 'https://www.nganluong.vn'
+      end
+    end
+
+  end
+
+  describe "#endpoint" do
+    context 'with sanbox env' do
+      it 'return /nl35/checkout.api.nganluong.post.php' do
+        Puerta.reset_config
+        checkout = Puerta::Nl::Checkout.new('ATM_ONLINE', {})
+        expect(checkout.endpoint).to eq '/nl35/checkout.api.nganluong.post.php'
+      end
+    end
+
+    context 'with production env' do
+      it 'return /checkout.api.nganluong.post.php' do
+        Puerta.reset_config
+        Puerta.configure do |config|
+          config.env = :production
+        end
+
+        checkout = Puerta::Nl::Checkout.new('ATM_ONLINE', {})
+        expect(checkout.endpoint).to eq '/checkout.api.nganluong.post.php'
+      end
+    end
+
+  end
+
+
   it "return 3.1 checkout version" do
     expect(Puerta::Nl::Checkout::VERSION).to eq '3.1'
   end
