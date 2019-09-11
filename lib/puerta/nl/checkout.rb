@@ -1,3 +1,6 @@
+require 'nokogiri'
+require 'faraday'
+
 module Puerta
   module Nl
     class Checkout
@@ -45,12 +48,9 @@ module Puerta
         }
       }
 
-      attr_accessor :type
+      attr_accessor :type, :result
 
-      # merchant_id = '';
-      # merchant_password = '';
-      # receiver_email = '';
-      # cur_code = 'vnd';
+      #@type(string), @option(Hash{:merchant_id, :merchant_password, :receiver_email, :cur_code})
       def initialize(type, options={})
         raise "Invalid type: #{type} in #{Checkout::TYPES}" if !Checkout::TYPES.include?(type)
 
@@ -86,10 +86,11 @@ module Puerta
         Checkout::BANK_CODES.reject {|k,v|  !v[:type].include?(@type)}
       end
 
-      def query(token)
+      # @token(string)
+      def get_transaction_detail(token)
         params = {
           merchant_id: @options[:merchant_id],
-          merchant_password: Digest::MD5.hex(@options[:merchant_password]),
+          merchant_password: Digest::MD5.hexdigest(@options[:merchant_password]),
           version: VERSION,
           function: 'GetTransactionDetail',
           token:token
@@ -102,19 +103,36 @@ module Puerta
           req.body = params
         end
 
-        response
+        docs = parse_xml(response.body)
+
+        error_code = docs.at('//error_code').text
+
+        @result = {
+          error_code: error_code,
+          error_message: error(error_code.to_s),
+          token: docs.at('//token').text,
+          transaction_id: docs.at('//token').text,
+          transaction_status: docs.at('//transaction_status').text,
+          bank_code: docs.at('//bank_code').text,
+        }
+        @result
       end
 
-      def require_params
-        [ 'merchant_id', 'merchant_password', 'version', 'function', 'receiver_email', 'order_code', 'total_amount', 'payment_method' ]
+      def ok?
+        @result && @result[:error_code] == '00'
       end
 
-      # @card_options:
-      # $order_code,$total_amount,$payment_type,$order_description,$tax_amount, $fee_shipping,
-      # $discount_amount,$return_url,$cancel_url,$buyer_fullname,$buyer_email,$buyer_mobile,
-  		# $buyer_address,$array_items,$bank_code
-      # bank_code: ( VISA, CREDIT_CARD_PREPAID, ATM_ONLINE, ATM_OFFLINE)
-      # no bank code: ( NH_OFFLINE, NL, IB_ONLINE )
+      def error_code
+        @result[:error_code]
+      end
+
+      def error_message
+        error(@result[:error_code] )
+      end
+
+      # @card_options(Hash({:order_code, :total_amount, :payment_type, :order_description, :tax_amount, :fee_shipping, :discount_amount,
+      # :return_url, :cancel_url, :buyer_fullname, :buyer_email, :buyer_mobile, :buyer_address, :array_items, :bank_code
+      # OjO: bank_code: ( VISA, CREDIT_CARD_PREPAID, ATM_ONLINE, ATM_OFFLINE), no bank code: ( NH_OFFLINE, NL, IB_ONLINE )
       def payment_options(card_options)
         card_options[:array_items] ||= []
 
@@ -142,6 +160,7 @@ module Puerta
         sending_params
       end
 
+      # << paymennt_options(card_options)
       def call(card_options)
         params = payment_options(card_options)
 
@@ -152,10 +171,27 @@ module Puerta
           req.body = params
         end
 
-        response
+        docs= parse_xml(response.body)
+        error_code = docs.at("//error_code").text
+
+        @result = {
+          token: docs.at('//token').text,
+          error_code: error_code,
+          error_message: error(error_code.to_s),
+          time_limit: docs.at("//time_limit").text,
+          description: docs.at("//description").text,
+          checkout_url: docs.at("//checkout_url").text,
+        }
+        @result
       end
 
-      def error_message(error_code)
+      # @xml_string(string)
+      def parse_xml(xml_string)
+         Nokogiri::XML(xml_string)
+      end
+
+      # @error_code(string)
+      def error(error_code)
         errors = {
   				'00' => 'Thành công',
   				'99' => 'Lỗi chưa xác minh',

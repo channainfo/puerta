@@ -2,6 +2,216 @@ require 'spec_helper'
 
 RSpec.describe Puerta::Nl::Checkout do
 
+  let!(:options) do
+    {
+      host: 'https://sandbox.nganluong.vn:8088',
+      end_point: '/nl35/checkout.api.nganluong.post.php',
+      merchant_id: '47792',
+      merchant_password: '2a349ed1ff2658bfe793628405bbfa89',
+      receiver_email: 'merchant@yopmail.com',
+      cur_code: 'vnd'
+    }
+  end
+
+
+  describe "#get_transaction_detail" do
+    context "with valid params" do
+      it "return result with transaction" do
+        checkout = Puerta::Nl::Checkout.new('ATM_ONLINE', options)
+        url = "#{checkout.host}#{checkout.endpoint}"
+
+        params = {
+          "function"=>"GetTransactionDetail",
+          "merchant_id"=>"47792",
+          "merchant_password"=>"ab594de9d42caaf1b71b53e35a87b3ed",
+          "token"=>"156801-ca796b81909b6160c5db7c50ee9baf36",
+          "version"=>"3.1"
+        }
+
+        success = "
+        <?xml version=\"1.0\" encoding=\"UTF-8\" ?>
+        <result>
+          <error_code>00</error_code>
+          <token>156801-ca796b81909b6160c5db7c50ee9baf36</token>
+          <description></description>
+          <transaction_status>00</transaction_status>
+          <receiver_email>nhant@peacesoft.net</receiver_email>
+          <order_code>E9LoYf6xIWdOUwXh</order_code>
+          <total_amount>500000</total_amount>
+          <payment_method>ATM_ONLINE</payment_method>
+          <bank_code>EXB</bank_code>
+          <payment_type>1</payment_type>
+          <order_description>BookMeBus</order_description>
+          <tax_amount>0</tax_amount>
+          <discount_amount>0</discount_amount>
+          <fee_shipping>0</fee_shipping>
+          <return_url>http%3A%2F%2Flocalhost%3A8080%2Ftransit%2Fgateway_nl_callbacks%2Freturn</return_url>
+          <cancel_url>http%3A%2F%2Flocalhost%3A8080%2Ftransit%2Fgateway_nl_callbacks%2Freturn</cancel_url>
+          <buyer_fullname>kimsan</buyer_fullname>
+          <buyer_email>kimsanlim27@gmail.com</buyer_email>
+          <buyer_mobile>+85570801395</buyer_mobile>
+          <buyer_address>Phnom Penh</buyer_address>
+          <affiliate_code></affiliate_code>
+          <transaction_id>19698950</transaction_id>
+        </result>
+        "
+
+        stub_request(:post, url).with(body: params).to_return(status: 200, body: success, headers: {})
+        result = checkout.get_transaction_detail('156801-ca796b81909b6160c5db7c50ee9baf36')
+
+        expect(result).to match :error_code=>"00",
+                                :error_message=>"Thành công",
+                                :token=>"156801-ca796b81909b6160c5db7c50ee9baf36",
+                                :transaction_id=>"156801-ca796b81909b6160c5db7c50ee9baf36",
+                                :transaction_status=>"00",
+                                :bank_code=>"EXB"
+
+
+      end
+    end
+
+    context "with invalid params" do
+      it "return result with error" do
+        checkout = Puerta::Nl::Checkout.new('ATM_ONLINE', options)
+        url = "#{checkout.host}#{checkout.endpoint}"
+
+        params = {
+          "function"=>"GetTransactionDetail",
+          "merchant_id"=>"47792",
+          "merchant_password"=>"ab594de9d42caaf1b71b53e35a87b3ed",
+          "token"=>"156801-ca796b81909b6160c5db7c50ee9baf36",
+          "version"=>"3.1"
+        }
+
+        success = "
+        <?xml version=\"1.0\" encoding=\"UTF-8\" ?>
+        <result>
+          <error_code>99</error_code>
+          <token></token>
+          <description></description>
+          <transaction_status>99</transaction_status>
+          <receiver_email>nhant@peacesoft.net</receiver_email>
+          <order_code>E9LoYf6xIWdOUwXh</order_code>
+          <total_amount>500000</total_amount>
+          <payment_method></payment_method>
+          <bank_code></bank_code>
+          <payment_type>1</payment_type>
+          <order_description></order_description>
+          <tax_amount>0</tax_amount>
+          <discount_amount>0</discount_amount>
+          <fee_shipping>0</fee_shipping>
+          <return_url>http%3A%2F%2Flocalhost%3A8080%2Ftransit%2Fgateway_nl_callbacks%2Freturn</return_url>
+          <cancel_url>http%3A%2F%2Flocalhost%3A8080%2Ftransit%2Fgateway_nl_callbacks%2Freturn</cancel_url>
+          <buyer_fullname>kimsan</buyer_fullname>
+          <buyer_email>kimsanlim27@gmail.com</buyer_email>
+          <buyer_mobile>+85570801395</buyer_mobile>
+          <buyer_address>Phnom Penh</buyer_address>
+          <affiliate_code></affiliate_code>
+          <transaction_id></transaction_id>
+        </result>
+        "
+
+        stub_request(:post, url).with(body: params).to_return(status: 200, body: success, headers: {})
+        result = checkout.get_transaction_detail('156801-ca796b81909b6160c5db7c50ee9baf36')
+
+        expect(result).to match :error_code=>"99",
+                                :error_message=>"Lỗi chưa xác minh",
+                                :token=>"",
+                                :transaction_id=>"",
+                                :transaction_status=>"99",
+                                :bank_code=>""
+
+      end
+    end
+  end
+
+
+  describe "#call" do
+    context 'with valid request payloads' do
+      it 'return result with token' do
+        checkout = Puerta::Nl::Checkout.new('ATM_ONLINE', options)
+        url = "#{checkout.host}#{checkout.endpoint}"
+
+        params = {
+          "cur_code"=>"vnd",
+          "function"=>"SetExpressCheckout",
+          "merchant_id"=>"47792",
+          "merchant_password"=>"ab594de9d42caaf1b71b53e35a87b3ed",
+          "payment_method"=>"ATM_ONLINE",
+          "receiver_email"=>"merchant@yopmail.com",
+          "total_item"=>"0",
+          "version"=>"3.1"
+        }
+
+        checkout_response = "
+        <?xml version=\"1.0\" encoding=\"UTF-8\" ?>
+          <result>
+            <error_code>00</error_code>
+            <token>156785-29e2e2f3b34fdab01726d1f53bacf8e5</token>
+            <description></description>
+            <time_limit>1568794311</time_limit>
+            <checkout_url>https://sandbox.nganluong.vn:8088/nl35/checkout/version31/index/token_code/156785-29e2e2f3b34fdab01726d1f53bacf8e5</checkout_url>
+          </result>
+        "
+
+        stub_request(:post, url).with(body: params).to_return(status: 200, body: checkout_response, headers: {})
+
+        card_options = {}
+        result = checkout.call(card_options)
+
+        expect(result).to match  :token=>"156785-29e2e2f3b34fdab01726d1f53bacf8e5",
+                                 :error_code=>"00",
+                                 :error_message=>"Thành công",
+                                 :time_limit=>"1568794311",
+                                 :description=>"",
+                                 :checkout_url=>"https://sandbox.nganluong.vn:8088/nl35/checkout/version31/index/token_code/156785-29e2e2f3b34fdab01726d1f53bacf8e5"
+
+      end
+    end
+
+    context 'with invalid request payloads' do
+      it 'return result with error' do
+        checkout = Puerta::Nl::Checkout.new('ATM_ONLINE', options)
+        url = "#{checkout.host}#{checkout.endpoint}"
+
+        params = {
+          "cur_code"=>"vnd",
+          "function"=>"SetExpressCheckout",
+          "merchant_id"=>"47792",
+          "merchant_password"=>"ab594de9d42caaf1b71b53e35a87b3ed",
+          "payment_method"=>"ATM_ONLINE",
+          "receiver_email"=>"merchant@yopmail.com",
+          "total_item"=>"0",
+          "version"=>"3.1"
+        }
+
+        checkout_response = "
+        <?xml version=\"1.0\" encoding=\"UTF-8\" ?>
+          <result>
+            <error_code>99</error_code>
+            <token></token>
+            <description></description>
+            <time_limit>1568794311</time_limit>
+            <checkout_url>https://sandbox.nganluong.vn:8088/nl35/checkout/version31/index/token_code/156785-29e2e2f3b34fdab01726d1f53bacf8e5</checkout_url>
+          </result>
+        "
+
+        stub_request(:post, url).with(body: params).to_return(status: 200, body: checkout_response, headers: {})
+
+        card_options = {}
+        result = checkout.call(card_options)
+        expect(result).to match :token=>"",
+                                 :error_code=>"99",
+                                 :error_message=>"Lỗi chưa xác minh",
+                                 :time_limit=>"1568794311",
+                                 :description=>"",
+                                 :checkout_url=>"https://sandbox.nganluong.vn:8088/nl35/checkout/version31/index/token_code/156785-29e2e2f3b34fdab01726d1f53bacf8e5"
+      end
+    end
+
+
+  end
+
   describe ".payment_types" do
     it "return a hash of payment_type along with its payment methods" do
       result = Puerta::Nl::Checkout.payment_types
@@ -71,7 +281,25 @@ RSpec.describe Puerta::Nl::Checkout do
 
       expect(result).to eq expected
     end
+  end
 
+  describe '#parse_xml' do
+    it 'return' do
+      checkout = Puerta::Nl::Checkout.new('ATM_ONLINE', {})
+      xml_string = "
+      <?xml version=\"1.0\" encoding=\"UTF-8\" ?>
+        <result>
+          <error_code>00</error_code>
+          <token>156785-29e2e2f3b34fdab01726d1f53bacf8e5</token>
+          <description></description>
+          <time_limit>1568794311</time_limit>
+          <checkout_url>https://sandbox.nganluong.vn:8088/nl35/checkout/version31/index/token_code/156785-29e2e2f3b34fdab01726d1f53bacf8e5</checkout_url>
+        </result>
+      "
+     doc = checkout.parse_xml(xml_string)
+     expect(doc.at('result/checkout_url').text).to eq "https://sandbox.nganluong.vn:8088/nl35/checkout/version31/index/token_code/156785-29e2e2f3b34fdab01726d1f53bacf8e5"
+
+    end
   end
 
   describe "#host" do
