@@ -10,11 +10,12 @@ Gem::Specification.new do |spec|
   spec.email         = ["channa.info@gmail.com"]
 
   spec.summary       = %q{
-    A gem to config env variable in development in dotenv, yaml, aws ssm parameter store, heroku in ruby and rails project.
+    A lib to make payment gateway integration for ASEAN region partcularly Cambodia, Vietnam and ...
   }
   spec.description   = %q{
-    This gem aims to load config to ENV varaible easily. Currently configuration can be done by a .env, a yaml file or by loading from
-    AWS System Manager Parameter Store which is recommended for production deployment.
+    Most payment gateway in Cambodia and Vietnam lack of ruby gems support.
+    Official libs are in PHP and Java. Puerta borned from in house need of BookMeBus to build it SaaS
+    that can help its customer to get paid.
 
   }
   spec.homepage      = "https://github.com/channainfo/puerta"

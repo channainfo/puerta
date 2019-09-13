@@ -4,8 +4,6 @@ RSpec.describe Puerta::Nl::Checkout do
 
   let!(:options) do
     {
-      host: 'https://sandbox.nganluong.vn:8088',
-      end_point: '/nl35/checkout.api.nganluong.post.php',
       merchant_id: '47792',
       merchant_password: '2a349ed1ff2658bfe793628405bbfa89',
       receiver_email: 'merchant@yopmail.com',
